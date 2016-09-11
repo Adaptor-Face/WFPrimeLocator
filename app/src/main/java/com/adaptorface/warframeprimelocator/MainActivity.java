@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
+// test commit
     private void fetchDropLocations() {
 
 // instantiate it within the onCreate method
