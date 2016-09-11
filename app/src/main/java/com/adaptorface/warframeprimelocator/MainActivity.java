@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        createList("test");
         fetchDropLocations();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,25 +88,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void generateDataSheet() {
-        File file = new File (getExternalCacheDir(), "MissionDecks.txt");
+        File file = new File (getFilesDir().getAbsolutePath(), "MissionDecks.txt");
         StringBuilder text = new StringBuilder();
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line = "not read";
+            Boolean relicFound = false;
+            Boolean test = true;
             while ((line = br.readLine()) != null) {
-                line = br.readLine();
-                if (line.toLowerCase().contains("[")) {
-                    String strArr[] = line.split("");
-                    StringBuilder strBuilder = new StringBuilder();
-                    for (int i = 0; i < strArr.length; i++) {
-                        if (!(strArr[i].contains("[")|| strArr[i].contains("]")))
-                        {
-                            strBuilder.append(strArr[i]);
+                if (line.contains("[")) {
+                    BufferedReader tbr = br;
+                    String lineCheck = "not read";
+                    while (!(lineCheck = tbr.readLine()).contains("[")) {
+                        if(test){
+                            createList(lineCheck);
+                            test = false;
+                        }
+                        if (lineCheck.toLowerCase().contains("axi") || lineCheck.toLowerCase().contains("neo") || lineCheck.toLowerCase().contains("meso") || lineCheck.toLowerCase().contains("lith")) {
+                            relicFound = true;
                         }
                     }
-                    String newString = strBuilder.toString();
-                    createList(newString);
+                }
+                if (relicFound) {
+                    if (line.contains("[")) {
+                        String strArr[] = line.split("");
+                        StringBuilder strBuilder = new StringBuilder();
+                        for (int i = 0; i < strArr.length; i++) {
+                            if (!(strArr[i].contains("[") || strArr[i].contains("]"))) {
+                                strBuilder.append(strArr[i]);
+                            }
+                        }
+                        String newString = strBuilder.toString();
+                        String listElementString = newString.replaceAll("(.)([A-Z])", "$1 $2");
+                        createList(listElementString);
+                    } else if (!line.isEmpty()) {
+                        String strArr[] = line.split(", MT_");
+                        String mission[] = strArr[0].split(" - ");
+                        createList(mission[1]);
+                    } else {
+                        relicFound = false;
+                    }
                 }
             }
             br.close();

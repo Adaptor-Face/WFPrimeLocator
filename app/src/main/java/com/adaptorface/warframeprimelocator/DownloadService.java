@@ -40,7 +40,7 @@ public class DownloadService extends IntentService {
             int fileLength = connection.getContentLength();
 
             // download the file
-            File file = new File (getExternalCacheDir(), "MissionDecks.txt");
+            File file = new File (getFilesDir().getAbsolutePath(), "MissionDecks.txt");
             file.createNewFile();
             InputStream input = new BufferedInputStream(connection.getInputStream());
             OutputStream output = new FileOutputStream(file);
