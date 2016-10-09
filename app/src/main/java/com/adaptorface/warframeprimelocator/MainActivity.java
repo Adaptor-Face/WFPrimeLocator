@@ -2,16 +2,21 @@ package com.adaptorface.warframeprimelocator;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TableRow;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,30 +31,65 @@ import java.util.TreeSet;
 
 public class MainActivity extends AppCompatActivity {
     HashSet<String> primes = null;
-    HashSet<String> relics = null;
     HashMap<String, String> locations = null;
-    TreeMap<String, ArrayList<String>> primeRelic = null;
     TreeMap<String, TreeMap<String, ArrayList<String>>> relicLocation = null;
     TreeMap<String, CheckBox> checkBoxes = new TreeMap<>();
     GenerateLists generateLists = null;
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.app_bar, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
 
+            case R.id.action_settings:
+                Intent i = new Intent(this, SettingsActivity.class);
+                startActivityForResult(i, 1);
+                break;
+
+        }
+
+        return true;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fetchDropLocations();
-        generateDataSheetService();
-        print();
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                findDropLocations(view);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        File file = new File(getFilesDir().getAbsolutePath(), "MissionDecks.txt");
+        if (!file.exists()) {
+            fetchDropLocations();
+        }
+        generateDataSheetService(file);
+        if (primes.isEmpty()) {
+            printConnectionError();
+        } else {
+            print();
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    findDropLocations(view);
 
-            }
-        });
+                }
+            });
+        }
     }
+
+    private void printConnectionError() {
+        ViewGroup tableLayout = (ViewGroup) findViewById(R.id.tableLayout);
+        TextView textView = new TextView(this);
+        textView.setText("Could not download data file.\nConnect to the Internet and try again.");
+        textView.setTextColor(Color.parseColor("#000000"));
+        textView.setTextSize(18);
+        tableLayout.addView(textView);
+    }
+
     private void findDropLocations(View view){
         Intent intent = new Intent(this, FoundLocations.class);
         ArrayList<String> checkedList = new ArrayList<>();
@@ -77,31 +117,7 @@ public class MainActivity extends AppCompatActivity {
             tableLayout.addView(tableRow);
         }
     }
-    private void printLocations(){
-        for (String location : relicLocation.keySet()) {
-            String string = location + ", " + locations.get(location);
-            for (String rotation : relicLocation.get(location).keySet()) {
-                if(!(relicLocation.get(location).get(rotation).isEmpty())) {
-                    string += " Rot: " + rotation;
-                    for(String relic : relicLocation.get(location).get(rotation)) {
-                        string += ", " + relic;
-                    }
-                }
-            }
-            CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(string);
-            checkBoxes.put(string, checkBox);
-        }
-        for (CheckBox cb : checkBoxes.values()) {
-            ViewGroup tableLayout = (ViewGroup) findViewById(R.id.tableLayout);
-            TableRow tableRow = new TableRow(this);
-            tableRow.addView(cb);
-            tableLayout.addView(tableRow);
-        }
-
-    }
-    private void generateDataSheetService() {
-        File file = new File (getFilesDir().getAbsolutePath(), "MissionDecks.txt");
+    private void generateDataSheetService(File file) {
         generateLists = new GenerateLists(file);
         primes = new HashSet<>(generateLists.getPrimes());
     }
@@ -136,67 +152,6 @@ public class MainActivity extends AppCompatActivity {
                     mProgressDialog.dismiss();
                 }
             }
-        }
-    }
-
-    private void createList(String string) {
-        ViewGroup tableLayout = (ViewGroup) findViewById(R.id.tableLayout);
-        CheckBox checkBox = new CheckBox(this);
-        checkBox.setText(string);
-        checkBoxes.put(string, checkBox);
-        TableRow tableRow = new TableRow(this);
-        tableRow.addView(checkBox);
-        tableLayout.addView(tableRow);
-    }
-
-    private void generateDataSheet() {
-        File file = new File (getFilesDir().getAbsolutePath(), "MissionDecks.txt");
-        StringBuilder text = new StringBuilder();
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = "not read";
-            Boolean relicFound = false;
-            Boolean test = true;
-            while ((line = br.readLine()) != null) {
-                if (line.contains("[")) {
-                    BufferedReader tbr = br;
-                    String lineCheck = "not read";
-                    while (!(lineCheck = tbr.readLine()).contains("[")) {
-                        if(test){
-                            createList(lineCheck);
-                            test = false;
-                        }
-                        if (lineCheck.toLowerCase().contains("axi") || lineCheck.toLowerCase().contains("neo") || lineCheck.toLowerCase().contains("meso") || lineCheck.toLowerCase().contains("lith")) {
-                            relicFound = true;
-                        }
-                    }
-                }
-                if (relicFound) {
-                    if (line.contains("[")) {
-                        String strArr[] = line.split("");
-                        StringBuilder strBuilder = new StringBuilder();
-                        for (int i = 0; i < strArr.length; i++) {
-                            if (!(strArr[i].contains("[") || strArr[i].contains("]"))) {
-                                strBuilder.append(strArr[i]);
-                            }
-                        }
-                        String newString = strBuilder.toString();
-                        String listElementString = newString.replaceAll("(.)([A-Z])", "$1 $2");
-                        createList(listElementString);
-                    } else if ((!(line.isEmpty())) && line.contains("-")) {
-                        String strArr[] = line.split(", MT_");
-                        String mission[] = strArr[0].split("-");
-                        createList(mission[1]);
-                    } else {
-                        relicFound = false;
-                    }
-                }
-            }
-            br.close();
-        }
-        catch (IOException e) {
-            //You'll need to add proper error handling here
         }
     }
 }

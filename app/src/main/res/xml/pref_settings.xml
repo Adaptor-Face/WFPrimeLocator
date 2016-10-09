@@ -1,0 +1,17 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- A 'parent' preference, which enables/disables child preferences (below)
+         when checked/unchecked. -->
+    <MultiSelectListPreference
+        android:entries="@array/pref_mission_type_list"
+        android:entryValues="@array/pref_mission_type_value"
+        android:defaultValue="@array/pref_mission_type_value"
+        android:key="mission_type"
+        android:title="@string/pref_title_mission_type"/>
+    <MultiSelectListPreference
+        android:entries="@array/pref_planet_list"
+        android:entryValues="@array/pref_planet_value"
+        android:defaultValue="@array/pref_planet_value"
+        android:key="planet"
+        android:title="@string/pref_title_planet"/>
+</PreferenceScreen>

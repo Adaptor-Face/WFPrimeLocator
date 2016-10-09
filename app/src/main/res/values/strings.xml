@@ -1,5 +1,71 @@
 <resources>
     <string name="app_name">Warframe Prime Locator</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_found_locations">FoundLocations</string>
+    <string name="title_activity_found_locations">Drop Locations</string>
+    <string name="relic_not_found">is currently only available from trading and does not drop.</string>
+    <string name="relic_found_no_settings_match">was found, but does not match your settings.</string>
+    <string name="title_activity_settings">Settings</string>
+    <string-array name="pref_mission_type_list">
+        <item>Capture</item>
+        <item>Defense</item>
+        <item>Excavation</item>
+        <item>Exterminate</item>
+        <item>Interception</item>
+        <item>Sabotage</item>
+        <item>Spy</item>
+        <item>Survival</item>
+    </string-array>
+    <string-array name="pref_mission_type_value">
+        <item>Capture</item>
+        <item>Defense</item>
+        <item>Excavation</item>
+        <item>Exterminate</item>
+        <item>Interception</item>
+        <item>Sabotage</item>
+        <item>Spy</item>
+        <item>Survival</item>
+    </string-array>
+
+    <string-array name="pref_planet_list">
+        <item>Ceres</item>
+        <item>Saturn</item>
+        <item>Earth</item>
+        <item>Eris</item>
+        <item>Europa</item>
+        <item>Jupiter</item>
+        <item>Lua</item>
+        <item>Mars</item>
+        <item>Mercury</item>
+        <item>Neptune</item>
+        <item>Pluto</item>
+        <item>Phobos</item>
+        <item>Sedna</item>
+        <item>Uranus</item>
+        <item>Venus</item>
+        <item>Void</item>
+    </string-array>
+    <string-array name="pref_planet_value">
+        <item>Ceres</item>
+        <item>Saturn</item>
+        <item>Earth</item>
+        <item>Eris</item>
+        <item>Europa</item>
+        <item>Jupiter</item>
+        <item>Lua</item>
+        <item>Mars</item>
+        <item>Mercury</item>
+        <item>Neptune</item>
+        <item>Pluto</item>
+        <item>Phobos</item>
+        <item>Sedna</item>
+        <item>Uranus</item>
+        <item>Venus</item>
+        <item>Void</item>
+    </string-array>
+
+    <string name="pref_title_mission_type">Mission types to show</string>
+    <string name="pref_header_mission_type">Mission Type</string>
+    <string name="pref_title_planet">Planets to show missions from</string>
+    <string name="pref_header_planet">Planets</string>
+
 </resources>
