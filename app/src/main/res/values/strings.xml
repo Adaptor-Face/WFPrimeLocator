@@ -67,5 +67,8 @@
     <string name="pref_header_mission_type">Mission Type</string>
     <string name="pref_title_planet">Planets to show missions from</string>
     <string name="pref_header_planet">Planets</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="fetch">Are you sure you want to download the data?</string>
 
 </resources>

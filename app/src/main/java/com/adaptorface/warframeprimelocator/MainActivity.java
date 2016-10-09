@@ -1,6 +1,9 @@
 package com.adaptorface.warframeprimelocator;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -35,33 +38,14 @@ public class MainActivity extends AppCompatActivity {
     TreeMap<String, TreeMap<String, ArrayList<String>>> relicLocation = null;
     TreeMap<String, CheckBox> checkBoxes = new TreeMap<>();
     GenerateLists generateLists = null;
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.app_bar, menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-
-            case R.id.action_settings:
-                Intent i = new Intent(this, SettingsActivity.class);
-                startActivityForResult(i, 1);
-                break;
-
-        }
-
-        return true;
-    }
+    File file = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-        File file = new File(getFilesDir().getAbsolutePath(), "MissionDecks.txt");
+        file = new File(getFilesDir().getAbsolutePath(), "MissionDecks.txt");
         if (!file.exists()) {
             fetchDropLocations();
         }
@@ -79,6 +63,45 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.app_bar, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.action_settings:
+                Intent i = new Intent(this, SettingsActivity.class);
+                startActivityForResult(i, 1);
+                break;
+            case R.id.action_refresh:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.fetch);
+// Add the buttons
+                final Intent intent = new Intent(this, DownloadService.class);
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        fetchDropLocations();
+                        generateDataSheetService(file);
+                    }
+                });
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                break;
+
+        }
+
+        return true;
     }
 
     private void printConnectionError() {
@@ -104,34 +127,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void print() {
-        for (String string : primes){
+        ViewGroup tableLayout = (ViewGroup) findViewById(R.id.tableLayout);
+        if (!primes.isEmpty()) {
+            tableLayout.removeAllViews();
+            for (String string : primes) {
 
-            CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(string);
-            checkBoxes.put(string, checkBox);
-        }
-        for (CheckBox cb : checkBoxes.values()) {
-            ViewGroup tableLayout = (ViewGroup) findViewById(R.id.tableLayout);
-            TableRow tableRow = new TableRow(this);
-            tableRow.addView(cb);
-            tableLayout.addView(tableRow);
+                CheckBox checkBox = new CheckBox(this);
+                checkBox.setText(string);
+                checkBoxes.put(string, checkBox);
+            }
+            for (CheckBox cb : checkBoxes.values()) {
+                TableRow tableRow = new TableRow(this);
+                tableRow.addView(cb);
+                tableLayout.addView(tableRow);
+            }
         }
     }
     private void generateDataSheetService(File file) {
         generateLists = new GenerateLists(file);
         primes = new HashSet<>(generateLists.getPrimes());
+        print();
     }
 // generateLists commit
-    private void fetchDropLocations() {
-
-// instantiate it within the onCreate method
-        Intent intent = new Intent(this, DownloadService.class);
+    public void fetchDropLocations() {
+        final Intent intent = new Intent(this, DownloadService.class);
         intent.putExtra("url", "https://raw.githubusercontent.com/VoiDGlitch/WarframeData/master/MissionDecks.txt");
         intent.putExtra("receiver", new DownloadReceiver(new Handler()));
         startService(intent);
-
-
     }
+    @SuppressLint("ParcelCreator")
     class DownloadReceiver extends ResultReceiver{
         ProgressDialog mProgressDialog = new ProgressDialog(MainActivity.this);
         public DownloadReceiver(Handler handler) {
@@ -140,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             mProgressDialog.setCancelable(true);
+            mProgressDialog.show();
         }
 
         @Override
@@ -150,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 mProgressDialog.setProgress(progress);
                 if (progress == 100) {
                     mProgressDialog.dismiss();
+                    generateDataSheetService(new File(getFilesDir().getAbsolutePath(), "MissionDecks.txt"));
                 }
             }
         }
